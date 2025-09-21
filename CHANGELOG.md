@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0-alpha.9](https://github.com/chrisbenincasa/tunarr/compare/v0.23.0-alpha.8...v0.23.0-alpha.9) (2025-09-21)
+
+
+### Bug Fixes
+
+* fix meilisearch grabber script to accept x64/x86_64 args for mac download ([415121e](https://github.com/chrisbenincasa/tunarr/commit/415121e5962a1e7fec86f2a84a64c6a1aa227130))
+
 ## [0.23.0-alpha.8](https://github.com/chrisbenincasa/tunarr/compare/v0.23.0-alpha.7...v0.23.0-alpha.8) (2025-09-19)
 
 
