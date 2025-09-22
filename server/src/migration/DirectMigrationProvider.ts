@@ -119,6 +119,7 @@ export class DirectMigrationProvider implements MigrationProvider {
           migration1756381281: Migration1756381281_AddLibraries,
           migration1757704591: Migration1757704591_AddProgramMediaSourceIndex,
           migration1758203109: Migration1758203109_AddProgramMedia,
+          //migration1758570688: Migration1758570688_AddLocalLibraries,
         },
         wrapWithTransaction,
       ),

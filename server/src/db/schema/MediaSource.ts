@@ -4,12 +4,13 @@ import { inArray, relations } from 'drizzle-orm';
 import { check, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import type { Updateable } from 'kysely';
 import { type Insertable, type Selectable } from 'kysely';
+import type { StrictExclude } from 'ts-essentials';
 import type { MediaSourceName } from './base.ts';
 import { type MediaSourceId } from './base.ts';
 import { type KyselifyBetter } from './KyselifyBetter.ts';
 import { Program } from './Program.ts';
 
-export const MediaSourceTypes = ['plex', 'jellyfin', 'emby'] as const;
+export const MediaSourceTypes = ['plex', 'jellyfin', 'emby', 'local'] as const;
 
 export type MediaSourceType = TupleToUnion<typeof MediaSourceTypes>;
 
@@ -21,7 +22,10 @@ export const MediaSourceType: MediaSourceMap = {
   Plex: 'plex',
   Jellyfin: 'jellyfin',
   Emby: 'emby',
+  Local: 'local',
 } as const;
+
+export type RemoteMediaSourceType = StrictExclude<MediaSourceType, 'local'>;
 
 export const MediaSource = sqliteTable(
   'media_source',
@@ -71,6 +75,7 @@ export const MediaSourceFields: (keyof MediaSourceTable)[] = [
 
 export type MediaSourceTable = KyselifyBetter<typeof MediaSource>;
 export type MediaSource = Selectable<MediaSourceTable>;
+export type MediaSourceOrm = InferSelectModel<typeof MediaSource>;
 export type NewMediaSource = Insertable<MediaSourceTable>;
 export type MediaSourceUpdate = Updateable<MediaSourceTable>;
 

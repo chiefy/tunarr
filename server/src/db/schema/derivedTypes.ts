@@ -4,10 +4,12 @@ import type { Insertable } from 'kysely';
 import type { DeepNullable, MarkRequired, StrictOmit } from 'ts-essentials';
 import type { Channel, ChannelFillerShow } from './Channel.ts';
 import type { FillerShow } from './FillerShow.ts';
+import type { LocalMediaSourcePath } from './LocalMediaSourcePath.ts';
 import type {
   MediaSource,
   MediaSourceLibrary,
   MediaSourceLibraryOrm,
+  MediaSourceOrm,
   MediaSourceType,
 } from './MediaSource.ts';
 import type {
@@ -246,7 +248,13 @@ export type NewMusicTrack = SpecificProgramType<'track', NewProgramDao>;
 
 export type MediaSourceWithLibraries = MediaSource & {
   libraries: MediaSourceLibrary[];
+  paths: LocalMediaSourcePath[];
 };
+
+export type MediaSourceWithLibrariesOrm = MediaSourceOrm & {
+  libraries: MediaSourceLibraryOrm[];
+};
+
 export type SpecificMediaSourceType<Typ extends MediaSourceType> = StrictOmit<
   MediaSourceWithLibraries,
   'type'

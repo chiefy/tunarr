@@ -69,7 +69,12 @@ import {
   uniq,
   uniqBy,
 } from 'lodash-es';
-import { Dictionary, MarkOptional, MarkRequired } from 'ts-essentials';
+import {
+  Dictionary,
+  MarkOptional,
+  MarkRequired,
+  StrictExclude,
+} from 'ts-essentials';
 import { v4 } from 'uuid';
 import { typedProperty } from '../types/path.ts';
 import { getNumericEnvVar, TUNARR_ENV_VARS } from '../util/env.ts';
@@ -1234,7 +1239,7 @@ export class ProgramDB implements IProgramDB {
   async getProgramGroupingCanonicalIds(
     mediaSourceLibraryId: string,
     type: ProgramGroupingType,
-    sourceType: MediaSourceType,
+    sourceType: StrictExclude<MediaSourceType, 'local'>,
   ) {
     return this.db
       .selectFrom('programGrouping')

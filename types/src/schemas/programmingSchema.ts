@@ -27,7 +27,7 @@ export const ProgramTypeSchema = z.union([
   z.literal('flex'),
 ]);
 
-export const ExternalSourceTypeSchema = z.enum(['plex', 'jellyfin', 'emby']);
+export const SourceTypeSchema = z.enum(['plex', 'jellyfin', 'emby', 'local']);
 
 export const ProgramSchema = z.object({
   artistName: z.string().optional(),
@@ -54,7 +54,7 @@ export const ProgramSchema = z.object({
   serverKey: z.string().optional(),
   showIcon: z.string().optional(),
   showTitle: z.string().optional(), // Unclear if this is necessary
-  sourceType: ExternalSourceTypeSchema,
+  sourceType: SourceTypeSchema,
   summary: z.string().optional(), // Not present on offline type
   title: z.string().optional(),
   type: ProgramTypeSchema,
@@ -210,7 +210,7 @@ export const ContentProgramSchema = CondensedContentProgramSchema.extend({
     MusicArtistContentProgramSchema,
   ).optional(),
   // External source metadata
-  externalSourceType: ExternalSourceTypeSchema,
+  externalSourceType: SourceTypeSchema,
   externalSourceName: z.string(),
   externalSourceId: z.string(),
   libraryId: z.string().optional(),
@@ -338,7 +338,7 @@ export const IdentifierSchema = z.object({
 const BaseItem = z.object({
   uuid: z.uuid(),
   canonicalId: z.string(),
-  sourceType: ExternalSourceTypeSchema,
+  sourceType: SourceTypeSchema,
   externalLibraryId: z.string(),
   externalId: z
     .string()
@@ -536,7 +536,7 @@ const PlexMovie = Movie.and(PlexMixin);
 export type PlexMovie = z.infer<typeof PlexMovie>;
 
 export const BaseStructuralGrouping = z.object({
-  sourceType: ExternalSourceTypeSchema,
+  sourceType: SourceTypeSchema,
   uuid: z.uuid(),
   title: z.string(),
   childCount: z.number().optional(),

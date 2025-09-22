@@ -1,21 +1,17 @@
 import { DebugPlexApiRouter } from '@/api/debug/debugPlexApi.js';
 import type { ArchiveDatabaseBackupFactory } from '@/db/backup/ArchiveDatabaseBackup.js';
 import { ArchiveDatabaseBackupKey } from '@/db/backup/ArchiveDatabaseBackup.js';
-import { MediaSourceType } from '@/db/schema/MediaSource.js';
 import { LineupCreator } from '@/services/dynamic_channels/LineupCreator.js';
 import { PlexTaskQueue } from '@/tasks/TaskQueue.js';
 import { SavePlexProgramExternalIdsTask } from '@/tasks/plex/SavePlexProgramExternalIdsTask.js';
 import { DateTimeRange } from '@/types/DateTimeRange.js';
 import { OpenDateTimeRange } from '@/types/OpenDateTimeRange.js';
 import type { RouterPluginAsyncCallback } from '@/types/serverType.js';
-import { enumValues } from '@/util/enumUtil.js';
 import { ifDefined } from '@/util/index.js';
-import { tag } from '@tunarr/types';
 import { ChannelLineupQuery } from '@tunarr/types/api';
 import { ChannelLineupSchema } from '@tunarr/types/schemas';
 import dayjs from 'dayjs';
-import { jsonArrayFrom } from 'kysely/helpers/sqlite';
-import { isUndefined, map, reject, some } from 'lodash-es';
+import { isUndefined } from 'lodash-es';
 import os from 'node:os';
 import z from 'zod/v4';
 import { container } from '../container.ts';
@@ -328,59 +324,6 @@ export const debugApi: RouterPluginAsyncCallback = async (fastify) => {
     async (req, res) => {
       await req.serverCtx.channelDB.loadAllLineupConfigs(true);
       return res.send();
-    },
-  );
-
-  fastify.get(
-    '/debug/db/test_direct_access',
-    {
-      schema: {
-        tags: ['Debug'],
-        querystring: z.object({
-          id: z.string(),
-        }),
-      },
-    },
-    async (req, res) => {
-      const mediaSource = (await req.serverCtx.mediaSourceDB.getById(
-        tag(req.query.id),
-      ))!;
-
-      const knownProgramIds = await req.serverCtx
-        .databaseFactory()
-        .selectFrom('programExternalId as p1')
-        .where(({ eb }) =>
-          eb.and([
-            eb('p1.externalSourceId', '=', mediaSource.name),
-            eb('p1.sourceType', '=', mediaSource.type),
-          ]),
-        )
-        .selectAll('p1')
-        .select((eb) =>
-          jsonArrayFrom(
-            eb
-              .selectFrom('programExternalId as p2')
-              .whereRef('p2.programUuid', '=', 'p1.programUuid')
-              .whereRef('p2.uuid', '!=', 'p1.uuid')
-              .select([
-                'p2.sourceType',
-                'p2.externalSourceId',
-                'p2.externalKey',
-              ]),
-          ).as('otherExternalIds'),
-        )
-        .groupBy('p1.uuid')
-        .execute();
-
-      const mediaSourceTypes = map(enumValues(MediaSourceType), (typ) =>
-        typ.toString(),
-      );
-      const danglingPrograms = reject(knownProgramIds, (program) => {
-        some(program.otherExternalIds, (eid) =>
-          mediaSourceTypes.includes(eid.sourceType),
-        );
-      });
-      return res.send(danglingPrograms);
     },
   );
 

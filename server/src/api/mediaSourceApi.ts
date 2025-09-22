@@ -25,9 +25,9 @@ import {
 } from '@tunarr/types/api';
 import {
   ContentProgramSchema,
-  ExternalSourceTypeSchema,
+  LocalMediaSourceSchema,
   MediaSourceLibrarySchema,
-  MediaSourceSettingsSchema,
+  SourceTypeSchema,
 } from '@tunarr/types/schemas';
 import { isEmpty, isError, isNil, isNull } from 'lodash-es';
 import type { MarkOptional } from 'ts-essentials';
@@ -40,6 +40,7 @@ import { EntityMutex } from '../services/EntityMutex.ts';
 import { MediaSourceLibraryRefresher } from '../services/MediaSourceLibraryRefresher.ts';
 import { MediaSourceProgressService } from '../services/scanner/MediaSourceProgressService.ts';
 import { TruthyQueryParam } from '../types/schemas.ts';
+import { fileExists } from '../util/fsUtil.ts';
 
 export const mediaSourceRouter: RouterPluginAsyncCallback = async (
   fastify,
@@ -56,7 +57,7 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
       schema: {
         tags: ['Media Source'],
         response: {
-          200: z.array(MediaSourceSettingsSchema),
+          200: z.array(LocalMediaSourceSchema),
           500: z.string(),
         },
       },
@@ -200,7 +201,7 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
         }),
         response: {
           200: MediaSourceLibrarySchema.extend({
-            mediaSource: MediaSourceSettingsSchema,
+            mediaSource: LocalMediaSourceSchema,
           }),
           404: z.void(),
         },
@@ -420,6 +421,7 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
         }
 
         const healthyPromise = match(server)
+          .returnType<Promise<MediaSourceStatus>>()
           .with({ type: 'plex' }, async (server) => {
             return (
               await req.serverCtx.mediaSourceApiFactory.getPlexApiClientForMediaSource(
@@ -440,6 +442,21 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
                 server,
               )
             ).ping();
+          })
+          .with({ type: 'local' }, async (source) => {
+            // TODO: Check all paths.
+            let ok = true;
+            for (const mediaPath of source.paths) {
+              ok &&= await fileExists(mediaPath.path);
+              if (!ok) {
+                break;
+              }
+            }
+            if (ok) {
+              return { healthy: true };
+            } else {
+              return { healthy: false, status: 'unreachable' };
+            }
           })
           .exhaustive();
 
@@ -469,7 +486,7 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
           name: z.string().optional(),
           accessToken: z.string(),
           uri: z.string(),
-          type: ExternalSourceTypeSchema,
+          type: SourceTypeSchema,
           username: z.string().optional(),
         }),
         response: {

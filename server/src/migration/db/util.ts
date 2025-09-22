@@ -62,6 +62,7 @@ export function makeKyselyMigrationFromSqlFile(
     fullCopy,
     async up(db) {
       for (const statement of await processSqlMigrationFile(filePath)) {
+        console.debug(statement);
         await db.executeQuery(statement);
       }
     },

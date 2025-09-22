@@ -160,10 +160,15 @@ export const EmbyServerSettingsSchema = BaseMediaSourceSettingsSchema.extend({
   type: z.literal('emby'),
 });
 
+export const LocalMediaSourceSchema = BaseMediaSourceLibrarySchema.extend({
+  type: z.literal('local'),
+});
+
 export const MediaSourceSettingsSchema = z.discriminatedUnion('type', [
   PlexServerSettingsSchema,
   JellyfinServerSettingsSchema,
   EmbyServerSettingsSchema,
+  LocalMediaSourceSchema,
 ]);
 
 export const PlexStreamSettingsSchema = z.object({

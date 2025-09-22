@@ -1,9 +1,18 @@
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { Channel } from './Channel.ts';
 import {
+  LocalMediaFolder,
+  LocalMediaFolderRelations,
+} from './LocalMediaFolder.ts';
+import {
+  LocalMediaSourcePath,
+  LocalMediaSourcePathRelations,
+} from './LocalMediaSourcePath.ts';
+import {
   MediaSource,
   MediaSourceLibrary,
   MediaSourceLibraryRelations,
+  MediaSourceRelations,
 } from './MediaSource.ts';
 import { Program, ProgramRelations } from './Program.ts';
 import { ProgramChapter, ProgramChapterRelations } from './ProgramChapter.ts';
@@ -38,8 +47,13 @@ export const schema = {
   programChapter: ProgramChapter,
   programChapterRelations: ProgramChapterRelations,
   mediaSource: MediaSource,
+  mediaSourceRelations: MediaSourceRelations,
   mediaSourceLibrary: MediaSourceLibrary,
   mediaSourceLibraryRelations: MediaSourceLibraryRelations,
+  localMediaSourcePath: LocalMediaSourcePath,
+  localMediaSourcePathRelations: LocalMediaSourcePathRelations,
+  localMediaFolder: LocalMediaFolder,
+  localMediaFolderRelations: LocalMediaFolderRelations,
 };
 
 export type DrizzleDBAccess = BetterSQLite3Database<typeof schema>;

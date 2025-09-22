@@ -6,6 +6,7 @@ import type {
   MediaSource,
   MediaSourceLibrary,
   MediaSourceType,
+  RemoteMediaSourceType,
 } from '../../db/schema/MediaSource.ts';
 import { devAssert } from '../../util/debug.ts';
 import type { Logger } from '../../util/logging/LoggerFactory.ts';
@@ -26,7 +27,7 @@ type RunState = 'unknown' | 'starting' | 'running' | 'canceled';
 
 export type GenericMediaSourceScanner = MediaSourceScanner<
   MediaLibraryType,
-  MediaSourceType,
+  RemoteMediaSourceType,
   unknown
 >;
 
@@ -37,7 +38,7 @@ export type GenericMediaSourceScannerFactory = (
 
 export abstract class MediaSourceScanner<
   MediaLibraryTypeT extends MediaLibraryType,
-  MediaSourceTypeT extends MediaSourceType,
+  MediaSourceTypeT extends RemoteMediaSourceType,
   ApiClientTypeT,
 > {
   #state: Map<string, RunState> = new Map();

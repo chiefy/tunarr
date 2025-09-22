@@ -14,6 +14,8 @@ import type { MarkNotNilable } from '../../types/util.ts';
 import type { MediaSourceName } from './base.ts';
 import { type MediaSourceId } from './base.ts';
 import { type KyselifyBetter } from './KyselifyBetter.ts';
+import { LocalMediaFolder } from './LocalMediaFolder.ts';
+import { LocalMediaSourcePath } from './LocalMediaSourcePath.ts';
 import {
   MediaSource,
   MediaSourceLibrary,
@@ -61,6 +63,8 @@ export const Program = sqliteTable(
       })
       .$type<MediaSourceId>(),
     libraryId: text().references(() => MediaSourceLibrary.uuid),
+    localMediaFolderId: text().references(() => LocalMediaFolder.uuid),
+    localMediaSourcePathId: text().references(() => LocalMediaSourcePath.uuid),
     filePath: text(),
     grandparentExternalKey: text(),
     icon: text(),
@@ -137,6 +141,14 @@ export const ProgramRelations = relations(Program, ({ many, one }) => ({
     references: [MediaSourceLibrary.uuid],
   }),
   externalIds: many(ProgramExternalId),
+  localMediaFolder: one(LocalMediaFolder, {
+    fields: [Program.localMediaFolderId],
+    references: [LocalMediaFolder.uuid],
+  }),
+  localMediaSourcePath: one(LocalMediaSourcePath, {
+    fields: [Program.localMediaSourcePathId],
+    references: [LocalMediaSourcePath.uuid],
+  }),
 }));
 
 export type ProgramTable = KyselifyBetter<typeof Program>;

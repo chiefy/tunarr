@@ -8,6 +8,8 @@ import type {
 } from './Channel.ts';
 import type { CustomShowContentTable, CustomShowTable } from './CustomShow.js';
 import type { FillerShowContentTable, FillerShowTable } from './FillerShow.js';
+import type { LocalMediaFolderTable } from './LocalMediaFolder.ts';
+import type { LocalMediaSourcePathTable } from './LocalMediaSourcePath.ts';
 import type {
   MediaSourceLibraryTable,
   MediaSourceTable,
@@ -39,6 +41,8 @@ export interface DB {
   customShowSubtitlePreferences: CustomShowSubtitlePreferencesTable;
   fillerShow: FillerShowTable;
   fillerShowContent: FillerShowContentTable;
+  localMediaSourcePath: LocalMediaSourcePathTable;
+  localMediaFolder: LocalMediaFolderTable;
   mediaSource: MediaSourceTable;
   mediaSourceLibrary: MediaSourceLibraryTable;
   program: ProgramTable;

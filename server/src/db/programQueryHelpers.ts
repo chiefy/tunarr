@@ -308,6 +308,8 @@ export const AllProgramFields = [
   'program.sourceType',
   'program.tvShowUuid',
   'program.mediaSourceId',
+  'program.localMediaFolderId',
+  'program.localMediaSourcePathId',
 ] as const;
 
 type ProgramUpsertFields = StrictExclude<

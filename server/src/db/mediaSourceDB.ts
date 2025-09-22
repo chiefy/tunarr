@@ -29,7 +29,7 @@ import { jsonObjectFrom } from 'kysely/helpers/sqlite';
 import { MarkRequired } from 'ts-essentials';
 import { MediaSourceApiFactory } from '../external/MediaSourceApiFactory.ts';
 import { MediaSourceLibraryRefresher } from '../services/MediaSourceLibraryRefresher.ts';
-import { withLibraries } from './mediaSourceQueryHelpers.ts';
+import { withLibraries, withPaths } from './mediaSourceQueryHelpers.ts';
 import {
   withProgramChannels,
   withProgramCustomShows,
@@ -43,6 +43,7 @@ import {
   MediaSourceWithLibraries,
   PlexMediaSource,
 } from './schema/derivedTypes.js';
+import { DrizzleDBAccess } from './schema/index.ts';
 import {
   MediaSource,
   MediaSourceFields,
@@ -76,12 +77,15 @@ export class MediaSourceDB {
     @inject(KEYS.Database) private db: Kysely<DB>,
     @inject(KEYS.MediaSourceLibraryRefresher)
     private mediaSourceLibraryRefresher: interfaces.AutoFactory<MediaSourceLibraryRefresher>,
+    @inject(KEYS.DrizzleDB)
+    private drizzleDB: DrizzleDBAccess,
   ) {}
 
   async getAll(): Promise<MediaSourceWithLibraries[]> {
     return this.db
       .selectFrom('mediaSource')
       .select(withLibraries)
+      .select(withPaths)
       .selectAll()
       .execute();
   }
@@ -90,6 +94,7 @@ export class MediaSourceDB {
     return this.db
       .selectFrom('mediaSource')
       .select(withLibraries)
+      .select(withPaths)
       .selectAll()
       .where('mediaSource.uuid', '=', id)
       .executeTakeFirst();
@@ -144,6 +149,7 @@ export class MediaSourceDB {
       .selectFrom('mediaSource')
       .selectAll()
       .select(withLibraries)
+      .select(withPaths)
       .where('mediaSource.type', '=', type)
       .$if(isNonEmptyString(nameOrId), (qb) =>
         qb.where('mediaSource.uuid', '=', retag<MediaSourceId>(nameOrId!)),

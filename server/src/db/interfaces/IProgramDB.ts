@@ -23,7 +23,7 @@ import type {
 } from '@/db/schema/derivedTypes.js';
 import type { MarkNonNullable, Maybe, PagedResult } from '@/types/util.js';
 import type { ChannelProgram } from '@tunarr/types';
-import type { Dictionary, MarkOptional } from 'ts-essentials';
+import type { Dictionary, MarkOptional, StrictExclude } from 'ts-essentials';
 import type { MediaSourceType } from '../schema/MediaSource.ts';
 import type { ProgramGroupingType } from '../schema/ProgramGrouping.ts';
 import type { MediaSourceId } from '../schema/base.ts';
@@ -167,7 +167,7 @@ export interface IProgramDB {
   getProgramGroupingCanonicalIds(
     mediaSourceLibraryId: string,
     type: ProgramGroupingType,
-    sourceType: MediaSourceType,
+    sourceType: StrictExclude<MediaSourceType, 'local'>,
   ): Promise<Dictionary<ProgramGroupingCanonicalIdLookupResult>>;
 
   getOrInsertProgramGrouping(
