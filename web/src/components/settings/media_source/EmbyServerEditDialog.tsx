@@ -32,7 +32,8 @@ import { isEmpty, isUndefined } from 'lodash-es';
 import { useSnackbar } from 'notistack';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { StrictOmit, type MarkOptional } from 'ts-essentials';
+import type { StrictOmit } from 'ts-essentials';
+import { type MarkOptional } from 'ts-essentials';
 import { useDebounceCallback, useDebounceValue } from 'usehooks-ts';
 import {
   postApiMediaSources,
@@ -95,7 +96,7 @@ export function EmbyServerEditDialog({ open, onClose, server }: Props) {
     if (open) {
       reset(server ?? emptyDefaults);
     }
-  }, [reset, open]);
+  }, [reset, open, server]);
 
   // These are updated in a watch callback, so we debounce them
   // along with the details we use to check server status. Otherwise

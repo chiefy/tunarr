@@ -1,5 +1,8 @@
 import type z from 'zod/v4';
-import type { MediaSourceLibrarySchema } from './schemas/settingsSchemas.js';
+import type {
+  LocalMediaSourceSchema,
+  MediaSourceLibrarySchema,
+} from './schemas/settingsSchemas.js';
 import {
   type EmbyServerSettingsSchema,
   GlobalMediaSourceSettingsSchema,
@@ -17,6 +20,8 @@ export type JellyfinServerSettings = z.infer<
 >;
 
 export type EmbyServerSettings = z.infer<typeof EmbyServerSettingsSchema>;
+
+export type LocalMediaSource = z.infer<typeof LocalMediaSourceSchema>;
 
 export type MediaSourceSettings = Prettify<
   z.infer<typeof MediaSourceSettingsSchema>

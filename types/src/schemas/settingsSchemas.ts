@@ -1,6 +1,6 @@
 import z from 'zod/v4';
 import { type TupleToUnion } from '../util.js';
-import { ScheduleSchema } from './utilSchemas.js';
+import { ContentProgramTypeSchema, ScheduleSchema } from './utilSchemas.js';
 
 export const XmlTvSettingsSchema = z.object({
   programmingHours: z.number().default(12),
@@ -105,10 +105,10 @@ export const FfmpegSettingsSchema = z.object({
   enableSubtitleExtraction: z.boolean().optional().default(false),
 });
 
-export const MediaSourceType = z.enum(['plex', 'jellyfin', 'emby']);
+export const MediaSourceType = z.enum(['plex', 'jellyfin', 'emby', 'local']);
 
 const BaseMediaSourceLibrarySchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string(),
   mediaType: z.enum([
     'movies',
@@ -127,7 +127,7 @@ const BaseMediaSourceLibrarySchema = z.object({
 export const MediaSourceLibrarySchema = z.object({
   ...BaseMediaSourceLibrarySchema.shape,
   get mediaSource() {
-    return BaseMediaSourceSettingsSchema;
+    return BaseMediaSourceSettingsSchema.omit({ libraries: true });
   },
 });
 
@@ -160,9 +160,14 @@ export const EmbyServerSettingsSchema = BaseMediaSourceSettingsSchema.extend({
   type: z.literal('emby'),
 });
 
-export const LocalMediaSourceSchema = BaseMediaSourceLibrarySchema.extend({
-  type: z.literal('local'),
-});
+export const LocalMediaSourceSchema = z
+  .object({
+    ...BaseMediaSourceSettingsSchema.shape,
+    type: z.literal('local'),
+    mediaType: ContentProgramTypeSchema,
+    path: z.string().array().nonempty(),
+  })
+  .omit({ accessToken: true, userId: true, username: true, uri: true });
 
 export const MediaSourceSettingsSchema = z.discriminatedUnion('type', [
   PlexServerSettingsSchema,

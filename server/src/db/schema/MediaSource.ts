@@ -12,6 +12,14 @@ import { Program } from './Program.ts';
 
 export const MediaSourceTypes = ['plex', 'jellyfin', 'emby', 'local'] as const;
 
+export const MediaLibraryTypes = [
+  'movies',
+  'shows',
+  'music_videos',
+  'other_videos',
+  'tracks',
+] as const;
+
 export type MediaSourceType = TupleToUnion<typeof MediaSourceTypes>;
 
 type MediaSourceMap = {
@@ -43,6 +51,7 @@ export const MediaSource = sqliteTable(
     uri: text().notNull(),
     username: text(),
     userId: text(),
+    mediaType: text({ enum: MediaLibraryTypes }),
   },
   (table) => [
     check(
@@ -79,14 +88,6 @@ export type MediaSourceOrm = InferSelectModel<typeof MediaSource>;
 export type NewMediaSource = Insertable<MediaSourceTable>;
 export type MediaSourceUpdate = Updateable<MediaSourceTable>;
 
-export const MediaLibraryTypes = [
-  'movies',
-  'shows',
-  'music_videos',
-  'other_videos',
-  'tracks',
-] as const;
-
 export type MediaLibraryType = TupleToUnion<typeof MediaLibraryTypes>;
 
 export const MediaSourceLibrary = sqliteTable(
@@ -115,7 +116,7 @@ export const MediaSourceLibraryRelations = relations(
   MediaSourceLibrary,
   ({ one, many }) => ({
     programs: many(Program),
-    one: one(MediaSource, {
+    mediaSource: one(MediaSource, {
       fields: [MediaSourceLibrary.mediaSourceId],
       references: [MediaSource.uuid],
     }),

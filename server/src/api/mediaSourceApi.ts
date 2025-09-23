@@ -1,7 +1,7 @@
 import { GlobalScheduler } from '@/services/Scheduler.js';
 import { UpdateXmlTvTask } from '@/tasks/UpdateXmlTvTask.js';
 import type { RouterPluginAsyncCallback } from '@/types/serverType.js';
-import { nullToUndefined } from '@/util/index.js';
+import { nullToUndefined, run } from '@/util/index.js';
 import { LoggerFactory } from '@/util/logging/LoggerFactory.js';
 import { numberToBoolean } from '@/util/sqliteUtil.js';
 import { seq } from '@tunarr/shared/util';
@@ -25,9 +25,8 @@ import {
 } from '@tunarr/types/api';
 import {
   ContentProgramSchema,
-  LocalMediaSourceSchema,
   MediaSourceLibrarySchema,
-  SourceTypeSchema,
+  MediaSourceSettingsSchema,
 } from '@tunarr/types/schemas';
 import { isEmpty, isError, isNil, isNull } from 'lodash-es';
 import type { MarkOptional } from 'ts-essentials';
@@ -57,7 +56,7 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
       schema: {
         tags: ['Media Source'],
         response: {
-          200: z.array(LocalMediaSourceSchema),
+          200: z.array(MediaSourceSettingsSchema),
           500: z.string(),
         },
       },
@@ -201,7 +200,7 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
         }),
         response: {
           200: MediaSourceLibrarySchema.extend({
-            mediaSource: LocalMediaSourceSchema,
+            mediaSource: MediaSourceSettingsSchema,
           }),
           404: z.void(),
         },
@@ -225,10 +224,10 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
         enabled: numberToBoolean(library.enabled),
         lastScannedAt: nullToUndefined(library.lastScannedAt),
         isLocked: entityLocker.isLibraryLocked(library),
-        mediaSource: convertToApiMediaSource(
-          entityLocker,
-          library.mediaSource,
-        )!,
+        // mediaSource: convertToApiMediaSource(
+        //   entityLocker,
+        //   library.mediaSource,
+        // )!,
         // TODO this is dumb
       } satisfies MediaSourceLibrary & {
         mediaSource: MediaSourceSettings;
@@ -482,13 +481,20 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
     {
       schema: {
         tags: ['Media Source'],
-        body: z.object({
-          name: z.string().optional(),
-          accessToken: z.string(),
-          uri: z.string(),
-          type: SourceTypeSchema,
-          username: z.string().optional(),
-        }),
+        body: z
+          .object({
+            name: z.string().optional(),
+            accessToken: z.string(),
+            uri: z.string(),
+            type: z.enum(['plex', 'jellyfin', 'emby']),
+            username: z.string().optional(),
+          })
+          .or(
+            z.object({
+              type: z.literal('local'),
+              paths: z.string().array().nonempty(),
+            }),
+          ),
         response: {
           200: MediaSourceStatusSchema,
           404: z.void(),
@@ -510,6 +516,7 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
                 name: tag(req.body.name ?? 'unknown'),
                 uuid: tag(v4()),
                 libraries: [],
+                paths: [],
               },
             });
 
@@ -527,6 +534,7 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
                 name: tag(req.body.name ?? 'unknown'),
                 uuid: tag(v4()),
                 libraries: [],
+                paths: [],
               },
             });
 
@@ -544,11 +552,30 @@ export const mediaSourceRouter: RouterPluginAsyncCallback = async (
                 name: tag(req.body.name ?? 'unknown'),
                 uuid: tag(v4()),
                 libraries: [],
+                paths: [],
               },
             });
 
           healthyPromise = emby.ping();
           break;
+        }
+        case 'local': {
+          // TODO: Check all paths.
+          const paths = req.body.paths;
+          healthyPromise = run<Promise<MediaSourceStatus>>(async () => {
+            let ok = true;
+            for (const mediaPath of paths) {
+              ok &&= await fileExists(mediaPath);
+              if (!ok) {
+                break;
+              }
+            }
+            if (ok) {
+              return { healthy: true };
+            } else {
+              return { healthy: false, status: 'unreachable' };
+            }
+          });
         }
       }
 

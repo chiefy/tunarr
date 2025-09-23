@@ -14,6 +14,7 @@ import { ResolutionSchema } from './miscSchemas.js';
 import { MediaSourceType } from './settingsSchemas.js';
 import {
   ChannelIconSchema,
+  ContentProgramTypeSchema,
   ExternalIdSchema,
   ExternalIdSourceType,
 } from './utilSchemas.js';
@@ -117,14 +118,6 @@ export const CondensedContentProgramSchema = BaseProgramSchema.extend({
   id: z.string().optional(), // Populated if persisted
   duration: z.number().min(0),
 });
-
-export const ContentProgramTypeSchema = z.enum([
-  'movie',
-  'episode',
-  'track',
-  'music_video',
-  'other_video',
-]);
 
 export type ContentProgramType = z.infer<typeof ContentProgramTypeSchema>;
 
